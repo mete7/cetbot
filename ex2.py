@@ -8,10 +8,18 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 st.set_page_config(page_title="💬 Chatbot", layout="centered")
 st.title("💬 Kaliteli Bir Chatbot")
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": "You are a helpful assistant."}]
+def load_context():
+    with open("scraped_summary.txt", "r", encoding="utf-8") as file:
+        return file.read()
 
+website_context = load_context()
+
+# Set up the system prompt using the txt file
+if "messages" not in st.session_state:
+    st.session_state.messages = [{
+        "role": "system",
+        "content": f"You are a helpful assistant. Use the following website information to answer user questions accurately:\n\n{website_context}"
+    }]
 # Add "Clear Chat" button
 if st.button("🧹 Clear Chat"):
     st.session_state.messages = [{"role": "system", "content": "You are a helpful assistant."}]
