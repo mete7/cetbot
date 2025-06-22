@@ -12,8 +12,7 @@ def load_context():
     with open("scraped_summary.txt", "r", encoding="utf-8") as file:
         return file.read()
 
-website_context = 'Anasayfa Ürünler ProLon Aralıklı Oruç Barı ProLon Aralıklı Oruç Barı KAN ŞEKERİNİ YÜKSELTMEYEN SAĞLIKLI ATIŞTIRMALIK Aralıklı Oruç Barı, açlık döneminizde yiyebileceğiniz ve sizi açlık durumundan çıkarmayan tek beslenme barıdır. Gluten, laktoz ve soya içermez. 250,00 TL Açlığı Taklit Eden Beslenme teknolojisine dayanan ve 20 yılı aşkın araştırma sonucu geliştirilen bu ürün, bilim insanları tarafından incelenmiş ve vücudunuzu açlık durumundan çıkarmadan tüketilebilecek benzersiz makro besinler ve mikro besinler karışımları oluşturulmuştur. Sepete Ekle Paket içeriği nedir? Ürün Bilgisi Gluten, laktoz ve soya içermez. Bitki bazlıdır. Prebiyotik lifler ve sağlıklı yağlar içerir. 4-5 gram bitki bazlı protein içerir. Keto diyetine uygundur. Düşük glisemik indeks. Yorumlar Bu ürüne ilk yorumu siz yapın! '
-
+website_context = 'prolon oruc bari 500 TL Turkiyede'
 # Set up the system prompt using the txt file
 if "messages" not in st.session_state:
     st.session_state.messages = [{
