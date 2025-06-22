@@ -18,11 +18,11 @@ website_context = load_context()
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "system",
-        "content": f"prolon.com.tr icin bir yardimcisin. Sitenin icerigine ve kendi bilgine dayanarak cevap ver. Sitenin icerigi burada:\n\n{website_context}"
+        "content": f"prolon.com.tr icin bir yardimcisin. Sitenin icerigine dayanarak cevap ver. Gerekli her sey site icerigindeki metinde. Sitenin icerigi burada:\n\n{website_context}"
     }]
 # Add "Clear Chat" button
 if st.button("🧹 Clear Chat"):
-    st.session_state.messages = [{"role": "system", "content": f"prolon.com.tr icin bir yardimcisin. Sitenin icerigine ve kendi bilgine dayanarak cevap ver. Sitenin icerigi burada:\n\n{website_context}"}]
+    st.session_state.messages = [{"role": "system", "content": f"prolon.com.tr icin bir yardimcisin. Sitenin icerigine dayanarak cevap ver. Gerekli her sey site icerigindeki metinde. Sitenin icerigi burada:\n\n{website_context}"}]
     st.rerun()
 
 # Display chat history with bubbles
