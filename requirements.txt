@@ -1,6 +1,4 @@
-import streamlit as st
-import os
-import numpy as np
-from openai import OpenAI
-import tiktoken
-from sklearn.metrics.pairwise import cosine_similarity
+streamlit
+openai
+tiktoken
+scikit-learn
