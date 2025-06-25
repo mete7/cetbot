@@ -47,14 +47,13 @@ chunk_embeddings, chunk_texts = embed_chunks(chunks)
 
 # === Step 3: Semantic Search ===
 
-def get_top_chunks(query, embeddings, texts, top_n=3):
+def get_similar_chunks(query, embeddings, texts, threshold=0.75):
     query_embed = client.embeddings.create(
         input=query,
         model="text-embedding-3-small"
     ).data[0].embedding
     similarities = cosine_similarity([query_embed], embeddings)[0]
-    top_indices = np.argsort(similarities)[-top_n:][::-1]
-    return [texts[i] for i in top_indices]
+    return [texts[i] for i, score in enumerate(similarities) if score > threshold]
 
 # === Step 3: Chat State Initialization ===
 
