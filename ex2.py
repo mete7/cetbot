@@ -72,9 +72,6 @@ if "last_chunks" not in st.session_state:
 
 # === Step 4: UI Controls ===
 
-st.set_page_config(page_title="💬 ProLon Chatbot", layout="centered")
-st.title("💬 ProLon Yardımcı Chatbot")
-
 if st.button("🧹 Sohbeti Temizle"):
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     st.session_state.last_chunks = []
@@ -101,18 +98,24 @@ if prompt := st.chat_input("Bir soru sor..."):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Semantic search
+    # 🔍 Semantic search (get chunks)
     top_chunks = get_top_chunks(prompt, chunk_embeddings, chunk_texts)
-    st.session_state.last_chunks = top_chunks  # Save to display later
-    context = "\n\n".join(top_chunks)
+    st.session_state.last_chunks = top_chunks  # Kaydet
 
-    # Build conversation prompt
+    # ✅ Chunk'ları hemen göster
+    with st.expander("🔍 Kullanılan İçerikler (Chunks)", expanded=True):
+        for i, chunk in enumerate(top_chunks):
+            st.markdown(f"**Chunk {i+1}:**")
+            st.code(chunk)
+
+    # 🔧 Chat promptu oluştur
+    context = "\n\n".join(top_chunks)
     full_prompt = [
         {"role": "system", "content": f"Aşağıdaki içeriğe göre soruyu yanıtla. Başka kaynak kullanma:\n\n{context}"},
         {"role": "user", "content": prompt}
     ]
 
-    # Get response from GPT
+    # 🤖 Asistan cevabı
     with st.chat_message("assistant"):
         with st.spinner("Yanıt oluşturuluyor..."):
             response = client.chat.completions.create(
