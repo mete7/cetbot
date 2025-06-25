@@ -47,13 +47,15 @@ chunk_embeddings, chunk_texts = embed_chunks(chunks)
 
 # === Step 3: Semantic Search ===
 
-def get_top_chunks(query, embeddings, texts, threshold=0.75):
+def get_top_chunks(query, embeddings, texts, top_n=3):
     query_embed = client.embeddings.create(
         input=query,
         model="text-embedding-3-small"
     ).data[0].embedding
     similarities = cosine_similarity([query_embed], embeddings)[0]
-    return [texts[i] for i, score in enumerate(similarities) if score > threshold]
+    top_indices = np.argsort(similarities)[-top_n:][::-1]
+    return [(texts[i], similarities[i]) for i in top_indices]
+
 
 # === Step 3: Chat State Initialization ===
 
@@ -86,8 +88,8 @@ for msg in st.session_state.messages[1:]:
 
 if st.session_state.last_chunks:
     st.markdown("### 🔍 Seçilen İçerikler (Chunks):")
-    for i, chunk in enumerate(st.session_state.last_chunks):
-        st.markdown(f"**Chunk {i+1}:**")
+    for i, (chunk, score) in enumerate(st.session_state.last_chunks):
+        st.markdown(f"**Chunk {i+1} (Benzerlik: {score:.3f}):**")
         st.code(chunk)
 
 # === Step 7: User Prompt & Response ===
@@ -97,24 +99,24 @@ if prompt := st.chat_input("Bir soru sor..."):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # 🔍 Semantic search (get chunks)
+    # 🔍 Semantic search (get chunks + similarity)
     top_chunks = get_top_chunks(prompt, chunk_embeddings, chunk_texts)
-    st.session_state.last_chunks = top_chunks  # Kaydet
+    st.session_state.last_chunks = top_chunks  # Save with similarity
 
-    # ✅ Chunk'ları hemen göster
+    # ✅ Show chunks before answering
     with st.expander("🔍 Kullanılan İçerikler (Chunks)", expanded=True):
-        for i, chunk in enumerate(top_chunks):
-            st.markdown(f"**Chunk {i+1}:**")
+        for i, (chunk, score) in enumerate(top_chunks):
+            st.markdown(f"**Chunk {i+1} (Benzerlik: {score:.3f}):**")
             st.code(chunk)
 
-    # 🔧 Chat promptu oluştur
-    context = "\n\n".join(top_chunks)
+    # 🔧 Build context from chunks
+    context = "\n\n".join([chunk for chunk, _ in top_chunks])
     full_prompt = [
         {"role": "system", "content": f"Aşağıdaki içeriğe göre soruyu yanıtla. Başka kaynak kullanma:\n\n{context}"},
         {"role": "user", "content": prompt}
     ]
 
-    # 🤖 Asistan cevabı
+    # 🤖 Assistant response
     with st.chat_message("assistant"):
         with st.spinner("Yanıt oluşturuluyor..."):
             response = client.chat.completions.create(
@@ -123,4 +125,5 @@ if prompt := st.chat_input("Bir soru sor..."):
             )
             reply = response.choices[0].message.content
             st.markdown(reply)
+
     st.session_state.messages.append({"role": "assistant", "content": reply})
