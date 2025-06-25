@@ -47,17 +47,14 @@ chunk_embeddings, chunk_texts = embed_chunks(chunks)
 
 # === Step 3: Semantic Search ===
 
-def get_top_chunk(query, embeddings, texts):
+def get_top_chunks(query, embeddings, texts, top_n=3):
     query_embed = client.embeddings.create(
         input=query,
         model="text-embedding-3-small"
     ).data[0].embedding
-    similarities = cosine_similarity(
-        [query_embed],
-        embeddings
-    )[0]
-    top_idx = int(np.argmax(similarities))
-    return texts[top_idx]
+    similarities = cosine_similarity([query_embed], embeddings)[0]
+    top_indices = np.argsort(similarities)[-top_n:][::-1]  # Top N, descending order
+    return [texts[i] for i in top_indices]
 
 # === Step 4: Chatbot Interface ===
 
@@ -81,16 +78,22 @@ for msg in st.session_state.messages[1:]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Chat input
 if prompt := st.chat_input("Bir soru sor..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    top_chunk = get_top_chunk(prompt, chunk_embeddings, chunk_texts)
+    top_chunks = get_similar_chunk(prompt, chunk_embeddings, chunk_texts)
+    context = "\n\n".join(top_chunks)  # Join similar chunks into one string
+
+    # 👇 Show the chunks being used
+    st.markdown("### 🔍 Seçilen İçerikler (Chunks):")
+    for i, chunk in enumerate(top_chunks):
+        st.markdown(f"**Chunk {i+1}:**")
+        st.code(chunk)
 
     full_prompt = [
-        {"role": "system", "content": f"Aşağıdaki içeriğe göre soruyu yanıtla. Başka kaynak kullanma:\n\n{top_chunk}"},
+        {"role": "system", "content": f"Aşağıdaki içeriğe göre soruyu yanıtla. Başka kaynak kullanma:\n\n{context}"},
         {"role": "user", "content": prompt}
     ]
 
