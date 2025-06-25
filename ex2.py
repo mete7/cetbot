@@ -47,7 +47,7 @@ chunk_embeddings, chunk_texts = embed_chunks(chunks)
 
 # === Step 3: Semantic Search ===
 
-def get_similar_chunks(query, embeddings, texts, threshold=0.75):
+def get_top_chunks(query, embeddings, texts, threshold=0.75):
     query_embed = client.embeddings.create(
         input=query,
         model="text-embedding-3-small"
