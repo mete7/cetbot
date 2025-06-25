@@ -53,62 +53,66 @@ def get_top_chunks(query, embeddings, texts, top_n=3):
         model="text-embedding-3-small"
     ).data[0].embedding
     similarities = cosine_similarity([query_embed], embeddings)[0]
-    top_indices = np.argsort(similarities)[-top_n:][::-1]  # Top N, descending order
+    top_indices = np.argsort(similarities)[-top_n:][::-1]
     return [texts[i] for i in top_indices]
 
-# === Step 4: Chatbot Interface ===
+# === Step 3: Chat State Initialization ===
 
-# Initialize chat history
+SYSTEM_PROMPT = (
+    "Sen prolon.com.tr hakkında yardımcı bir asistansın. "
+    "Sadece verilen içerikten faydalanarak yanıt ver. "
+    "Eğer içerikte bilgi yoksa 'Bu bilgiye içerikte yer verilmemiş.' de."
+)
+
 if "messages" not in st.session_state:
-    st.session_state.messages = [{
-        "role": "system",
-        "content": "Sen prolon.com.tr hakkında yardımcı bir asistansın. Sadece verilen içerikten faydalanarak yanıt ver. Eğer içerikte bilgi yoksa 'Bu bilgiye içerikte yer verilmemiş.' de."
-    }]
+    st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-# Clear Chat Button
+if "last_chunks" not in st.session_state:
+    st.session_state.last_chunks = []
+
+# === Step 4: UI Controls ===
+
+st.set_page_config(page_title="💬 ProLon Chatbot", layout="centered")
+st.title("💬 ProLon Yardımcı Chatbot")
+
 if st.button("🧹 Sohbeti Temizle"):
-    st.session_state.messages = [{
-        "role": "system",
-        "content": "Sen prolon.com.tr hakkında yardımcı bir asistansın. Sadece verilen içerikten faydalanarak yanıt ver. Eğer içerikte bilgi yoksa 'Bu bilgiye içerikte yer verilmemiş.' de."
-    }]
+    st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    st.session_state.last_chunks = []
     st.rerun()
 
-# Display chat history
+# === Step 5: Show Chat History ===
+
 for msg in st.session_state.messages[1:]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+# === Step 6: Show Previously Used Chunks ===
 
-# Display previous chunks if they exist
-if "last_chunks" in st.session_state:
+if st.session_state.last_chunks:
     st.markdown("### 🔍 Seçilen İçerikler (Chunks):")
     for i, chunk in enumerate(st.session_state.last_chunks):
         st.markdown(f"**Chunk {i+1}:**")
         st.code(chunk)
 
+# === Step 7: User Prompt & Response ===
 
 if prompt := st.chat_input("Bir soru sor..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    top_chunks = get_similar_chunk(prompt, chunk_embeddings, chunk_texts)
+    # Semantic search
+    top_chunks = get_top_chunks(prompt, chunk_embeddings, chunk_texts)
+    st.session_state.last_chunks = top_chunks  # Save to display later
     context = "\n\n".join(top_chunks)
 
-    # Store in session so it persists
-    st.session_state.last_chunks = top_chunks
-
-    # 👇 Show the chunks being used
-    st.markdown("### 🔍 Seçilen İçerikler (Chunks):")
-    for i, chunk in enumerate(top_chunks):
-        st.markdown(f"**Chunk {i+1}:**")
-        st.code(chunk)
-
+    # Build conversation prompt
     full_prompt = [
         {"role": "system", "content": f"Aşağıdaki içeriğe göre soruyu yanıtla. Başka kaynak kullanma:\n\n{context}"},
         {"role": "user", "content": prompt}
     ]
 
+    # Get response from GPT
     with st.chat_message("assistant"):
         with st.spinner("Yanıt oluşturuluyor..."):
             response = client.chat.completions.create(
