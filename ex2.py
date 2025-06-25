@@ -78,13 +78,25 @@ for msg in st.session_state.messages[1:]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+
+# Display previous chunks if they exist
+if "last_chunks" in st.session_state:
+    st.markdown("### 🔍 Seçilen İçerikler (Chunks):")
+    for i, chunk in enumerate(st.session_state.last_chunks):
+        st.markdown(f"**Chunk {i+1}:**")
+        st.code(chunk)
+
+
 if prompt := st.chat_input("Bir soru sor..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     top_chunks = get_similar_chunk(prompt, chunk_embeddings, chunk_texts)
-    context = "\n\n".join(top_chunks)  # Join similar chunks into one string
+    context = "\n\n".join(top_chunks)
+
+    # Store in session so it persists
+    st.session_state.last_chunks = top_chunks
 
     # 👇 Show the chunks being used
     st.markdown("### 🔍 Seçilen İçerikler (Chunks):")
