@@ -4,7 +4,6 @@ import numpy as np
 from openai import OpenAI
 import tiktoken
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.decomposition import PCA
 
 # Load API key
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -14,6 +13,7 @@ st.title("💬 Bilgi Tabanlı Chatbot (RAG)")
 
 # === Step 1: Load and Chunk the Text File ===
 @st.cache_data(show_spinner="🔍 Veriler işleniyor...")
+
 def load_and_chunk_text(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         raw = f.read()
@@ -27,9 +27,11 @@ def load_and_chunk_text(file_path):
                 chunks.append(cleaned)
     return chunks
 
+
 chunks = load_and_chunk_text("scraped_summary.txt")
 
 # === Step 2: Embed Chunks with OpenAI ===
+
 @st.cache_data(show_spinner="🔗 Embed'ler oluşturuluyor...")
 def embed_chunks(chunks):
     embeddings = []
@@ -41,27 +43,19 @@ def embed_chunks(chunks):
         embeddings.append(response.data[0].embedding)
     return np.array(embeddings), chunks
 
-raw_embeddings, chunk_texts = embed_chunks(chunks)
-
-# === Optional: Reduce Dimensionality with PCA ===
-@st.cache_data(show_spinner="📉 PCA ile boyut indirgeniyor...")
-def reduce_embeddings_with_pca(embeddings, n_components=5):
-    pca = PCA(n_components=n_components)
-    reduced = pca.fit_transform(embeddings)
-    return reduced, pca
-
-chunk_embeddings, pca_model = reduce_embeddings_with_pca(raw_embeddings)
+chunk_embeddings, chunk_texts = embed_chunks(chunks)
 
 # === Step 3: Semantic Search ===
+
 def get_top_chunks(query, embeddings, texts, top_n=3):
     query_embed = client.embeddings.create(
         input=query,
         model="text-embedding-3-small"
     ).data[0].embedding
-    reduced_query = pca_model.transform([query_embed])  # Apply same PCA
-    similarities = cosine_similarity(reduced_query, embeddings)[0]
+    similarities = cosine_similarity([query_embed], embeddings)[0]
     top_indices = np.argsort(similarities)[-top_n:][::-1]
     return [(texts[i], similarities[i]) for i in top_indices]
+
 
 # === Step 3: Chat State Initialization ===
 
