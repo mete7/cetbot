@@ -45,7 +45,7 @@ raw_embeddings, chunk_texts = embed_chunks(chunks)
 
 # === Optional: Reduce Dimensionality with PCA ===
 @st.cache_data(show_spinner="📉 PCA ile boyut indirgeniyor...")
-def reduce_embeddings_with_pca(embeddings, n_components=20):
+def reduce_embeddings_with_pca(embeddings, n_components=5):
     pca = PCA(n_components=n_components)
     reduced = pca.fit_transform(embeddings)
     return reduced, pca
