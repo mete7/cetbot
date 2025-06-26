@@ -28,7 +28,7 @@ def load_and_chunk_text(file_path):
     return chunks
 
 
-chunks = load_and_chunk_text("scraped_summary.txt")
+chunks = load_and_chunk_text("website_and_brosur_scraped.txt")
 
 # === Step 2: Embed Chunks with OpenAI ===
 
