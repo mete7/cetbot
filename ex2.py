@@ -60,8 +60,8 @@ def get_top_chunks(query, embeddings, texts, top_n=10):
 # === Step 3: Chat State Initialization ===
 
 SYSTEM_PROMPT = (
-    "Sen prolon.com.tr hakkında yardımcı bir asistansın. "
-    "Sadece verilen içerikten faydalanarak yanıt ver. "
+    "Sen prolon.com.tr hakkında yardımcı bir asistansın."
+    "Sadece verilen içerikten faydalanarak yanıt ver. Ortalama uzunlukta cevap ver. Cok kisa olmasin cevaplar"
     "Eğer içerikte bilgiyi kesinlikle bulamazsan, o zaman kendi bilginle cevapla."
 )
 
@@ -112,7 +112,7 @@ if prompt := st.chat_input("Bir soru sor..."):
     # 🔧 Build context from chunks
     context = "\n\n".join([chunk for chunk, _ in top_chunks])
     full_prompt = [
-        {"role": "system", "content": f"Aşağıdaki içeriğe göre soruyu yanıtla. Eğer içerikte bilgiyi kesinlikle bulamazsan, o zaman kendi bilginle cevapla: \n\n{context}"},
+        {"role": "system", "content": f"Sen Prolon, longevity, prolon.com.tr hakkında yardımcı bir asistansın. Sadece verilen içerikten faydalanarak yanıt ver. Cok kisa olmayan, Ortalama uzunlukta cevap ver. Eğer içerikte bilgiyi kesinlikle bulamazsan, o zaman kendi bilginle cevapla.: \n\n{context}"},
         {"role": "user", "content": prompt}
     ]
 
