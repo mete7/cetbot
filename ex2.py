@@ -94,6 +94,18 @@ if st.session_state.last_chunks:
 
 # === Step 7: User Prompt & Response ===
 
+WELCOME_MESSAGE = "Merhaba. Ben ProLon için bir asistanım. Bana prolon.com.tr hakkında her şeyi sorabilirsin. Sana nasıl yardımcı olabilirim?"
+
+# Show welcome message once when the app is opened
+if "welcome_shown" not in st.session_state:
+    with st.chat_message("assistant"):
+        st.markdown("Merhaba. Ben ProLon için bir asistanım. Bana prolon.com.tr hakkında her şeyi sorabilirsin. Sana nasıl yardımcı olabilirim?")
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": "Merhaba. Ben ProLon için bir asistanım. Bana prolon.com.tr hakkında her şeyi sorabilirsin. Sana nasıl yardımcı olabilirim?"
+    })
+    st.session_state.welcome_shown = True
+
 if prompt := st.chat_input("Bir soru sor..."):
     with st.chat_message("user"):
         st.markdown(prompt)
