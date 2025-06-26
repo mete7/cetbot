@@ -94,8 +94,6 @@ if st.session_state.last_chunks:
 
 # === Step 7: User Prompt & Response ===
 
-WELCOME_MESSAGE = "Merhaba. Ben ProLon için bir asistanım. Bana prolon.com.tr hakkında her şeyi sorabilirsin. Sana nasıl yardımcı olabilirim?"
-
 # Show welcome message once when the app is opened
 if "welcome_shown" not in st.session_state:
     with st.chat_message("assistant"):
