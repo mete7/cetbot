@@ -1,4 +1,6 @@
-streamlit
+fastapi
+uvicorn
 openai
-tiktoken
 scikit-learn
+numpy
+python-dotenv
