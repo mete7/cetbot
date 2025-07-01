@@ -71,7 +71,7 @@ async def chat(req: ChatRequest):
     context = "\n\n".join([chunk for chunk, _ in top_chunks])
 
     full_prompt = [
-        {"role": "system", "content": f"Sen Prolon, longevity, prolon.com.tr hakkında yardımcı bir asistansın. Sadece verilen içerikten faydalanarak yanıt ver. Cok kisa olmayan, Ortalama uzunlukta cevap ver. Eğer içerikte bilgiyi kesinlikle bulamazsan, o zaman kendi bilginle cevapla. Kullanıcının ilgilendiği konuyla yardımcı olduktan sonra, ilgili başka bir konu hakkında da bilgi isteyip istemediğini sor. Icerik: \n\n{context}"},
+        {"role": "system", "content": f"Sen Prolon, longevity, prolon.com.tr hakkında yardımcı bir asistansın. Sadece verilen içerikten faydalanarak yanıt ver. Cok kisa olmayan, Ortalama uzunlukta cevap ver. Eğer içerikte bilgiyi kesinlikle bulamazsan, o zaman kendi bilginle cevapla. Icerik: \n\n{context}"},
         {"role": "user", "content": prompt}
     ]
 
